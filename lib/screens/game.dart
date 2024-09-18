@@ -50,6 +50,15 @@ class _MainGameState extends State<MainGame> {
     [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY, false],
     [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY, false],
     [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY, false],
+    [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY + 0.07, false],
+    [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY + 0.07, false],
+    [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY + 0.07, false],
+    [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY + 0.14, false],
+    [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY + 0.14, false],
+    [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY + 0.14, false],
+    [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY + 0.21, false],
+    [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY + 0.21, false],
+    [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY + 0.21, false],
   ];
 
   void startGame() {
@@ -73,40 +82,50 @@ class _MainGameState extends State<MainGame> {
   // Check if brick is broken or not
   void checkForBrokenBrick() {
     for (int i = 0; i < MyBricks.length; i++) {
-      if (ballX >= MyBricks[i][0] &&
-          ballX <= MyBricks[i][0] + brickWidth &&
-          ballY <= MyBricks[i][1] + brickHeight &&
-          MyBricks[i][2] == false) {
-        setState(() {
-          MyBricks[i][2] = true;
+      if (MyBricks[i][2] == false) {
+        // Only check if the brick is not broken
+        double brickX = MyBricks[i][0];
+        double brickY = MyBricks[i][1];
 
-          double leftSideDist = (MyBricks[i][0] - ballX).abs();
-          double rightSideDist = (MyBricks[i][0] + brickWidth - ballX).abs();
-          double topSideDist = (MyBricks[i][1] - ballY).abs();
-          double bottomSideDist = (MyBricks[i][1] + brickHeight - ballY).abs();
+        // Calculate the ball's position
+        double ballLeft = ballX - 0.02; // Assuming ballRadius is defined
+        double ballRight = ballX + 0.02;
+        double ballTop = ballY + 0.02;
+        double ballBottom = ballY - 0.02;
 
-          String min =
-              findMin(leftSideDist, rightSideDist, topSideDist, bottomSideDist);
+        // Check for collision
+        if (ballRight >= brickX &&
+            ballLeft <= brickX + brickWidth &&
+            ballBottom <= brickY + brickHeight &&
+            ballTop >= brickY) {
+          setState(() {
+            MyBricks[i][2] = true; // Mark the brick as broken
 
-          switch (min) {
-            case 'left':
-              // if ball hit left side of briY
-              ballXDirection = direction.LEFT;
-              break;
-            case 'right':
-              // if ball hit right side of briY
-              ballXDirection = direction.RIGHT;
-              break;
-            case 'up':
-              // if ball hit up side of briY
-              ballYDirection = direction.UP;
-              break;
-            case 'down':
-              // if ball hit down side of briY
-              ballYDirection = direction.DOWN;
-              break;
-          }
-        });
+            // Determine the side of the collision
+            double leftSideDist = (brickX - ballRight).abs();
+            double rightSideDist = (ballLeft - (brickX + brickWidth)).abs();
+            double topSideDist = (brickY + brickHeight - ballBottom).abs();
+            double bottomSideDist = (ballTop - brickY).abs();
+
+            String min = findMin(
+                leftSideDist, rightSideDist, topSideDist, bottomSideDist);
+
+            switch (min) {
+              case 'left':
+                ballXDirection = direction.LEFT;
+                break;
+              case 'right':
+                ballXDirection = direction.RIGHT;
+                break;
+              case 'up':
+                ballYDirection = direction.UP;
+                break;
+              case 'down':
+                ballYDirection = direction.DOWN;
+                break;
+            }
+          });
+        }
       }
     }
   }
@@ -216,6 +235,15 @@ class _MainGameState extends State<MainGame> {
         [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY, false],
         [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY, false],
         [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY, false],
+        [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY + 0.07, false],
+        [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY + 0.07, false],
+        [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY + 0.07, false],
+        [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY + 0.14, false],
+        [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY + 0.14, false],
+        [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY + 0.14, false],
+        [firstBrickX + 0 * (brickWidth + brickGap), firstBrickY + 0.21, false],
+        [firstBrickX + 1 * (brickWidth + brickGap), firstBrickY + 0.21, false],
+        [firstBrickX + 2 * (brickWidth + brickGap), firstBrickY + 0.21, false],
       ];
     });
   }
