@@ -1,20 +1,20 @@
 import 'package:brick_breaker_app/screens/index.dart';
 import 'package:flutter/material.dart';
 
-class GameOverScreen extends StatelessWidget {
-  final bool isGameOver;
+class GameWinScreen extends StatelessWidget {
+  final bool isGameWon;
   final function;
-  const GameOverScreen({super.key, required this.isGameOver, this.function});
+  const GameWinScreen({super.key, required this.isGameWon, this.function});
 
   @override
   Widget build(BuildContext context) {
-    return isGameOver
+    return isGameWon
         ? Stack(
             children: [
               Container(
                 alignment: const Alignment(0, -0.2),
                 child: const Text(
-                  "G A M E  O V E R",
+                  "You Won!",
                   style: TextStyle(
                       fontFamily: "CabinSketch",
                       color: Colors.deepPurple,

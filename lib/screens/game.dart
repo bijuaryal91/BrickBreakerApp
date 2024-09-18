@@ -4,6 +4,7 @@ import 'package:brick_breaker_app/screens/ball.dart';
 import 'package:brick_breaker_app/screens/bricks.dart';
 import 'package:brick_breaker_app/screens/coverscreen.dart';
 import 'package:brick_breaker_app/screens/gameoverscreen.dart';
+import 'package:brick_breaker_app/screens/gamewinscreen.dart';
 import 'package:brick_breaker_app/screens/player.dart';
 import 'package:flutter/material.dart';
 
@@ -43,6 +44,7 @@ class _MainGameState extends State<MainGame> {
   // game settings
   bool hasGameStarted = false;
   bool isGameOver = false;
+  bool isGameWon = false;
   // bool brickBroken = false;
 
   List MyBricks = [
@@ -64,6 +66,12 @@ class _MainGameState extends State<MainGame> {
   void startGame() {
     hasGameStarted = true;
     Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      // Check if the game is won
+      if (isGameWon) {
+        timer.cancel(); // Stop the timer if the game is won
+        return;
+      }
+
       // Update ball direction
       updateDirection();
       // Move ball
@@ -79,7 +87,6 @@ class _MainGameState extends State<MainGame> {
     });
   }
 
-  // Check if brick is broken or not
   void checkForBrokenBrick() {
     for (int i = 0; i < MyBricks.length; i++) {
       if (MyBricks[i][2] == false) {
@@ -102,58 +109,89 @@ class _MainGameState extends State<MainGame> {
             MyBricks[i][2] = true; // Mark the brick as broken
 
             // Determine the side of the collision
-            double leftSideDist = (brickX - ballRight).abs();
-            double rightSideDist = (ballLeft - (brickX + brickWidth)).abs();
-            double topSideDist = (brickY + brickHeight - ballBottom).abs();
-            double bottomSideDist = (ballTop - brickY).abs();
+            double ballRadius = 0.02; // Assuming this is the radius of the ball
+            double leftSideDist = (brickX - (ballX + ballRadius)).abs();
+            double rightSideDist =
+                ((ballX - ballRadius) - (brickX + brickWidth)).abs();
+            double topSideDist =
+                ((brickY + brickHeight) - (ballY - ballRadius)).abs();
+            double bottomSideDist = (ballY + ballRadius - brickY).abs();
 
+// Find the minimum distance side
             String min = findMin(
                 leftSideDist, rightSideDist, topSideDist, bottomSideDist);
 
+// Adjust ball position and direction based on the collision side
             switch (min) {
               case 'left':
                 ballXDirection = direction.LEFT;
+                ballX = brickX -
+                    (ballRadius + 0.01); // Move the ball out of the brick
                 break;
               case 'right':
                 ballXDirection = direction.RIGHT;
+                ballX = brickX +
+                    brickWidth +
+                    (ballRadius + 0.01); // Move the ball out of the brick
                 break;
-              case 'up':
+              case 'top':
                 ballYDirection = direction.UP;
+                ballY = brickY +
+                    brickHeight +
+                    (ballRadius + 0.01); // Move the ball out of the brick
                 break;
-              case 'down':
+              case 'bottom':
                 ballYDirection = direction.DOWN;
+                ballY = brickY -
+                    (ballRadius + 0.01); // Move the ball out of the brick
                 break;
             }
+
+// Check if the brick is hit and mark it as broken
+            setState(() {
+              MyBricks[i][2] = true; // Mark the brick as broken
+            });
           });
         }
       }
     }
+
+    // Check if all bricks are broken
+    setState(() {
+      int counter = 0;
+      for (int l = 0; l < MyBricks.length; l++) {
+        if (MyBricks[l][2] == true) {
+          counter++;
+        }
+      }
+
+      if (counter == MyBricks.length) {
+        isGameWon = true; // All bricks are broken
+      }
+    });
   }
 
-  String findMin(double a, double b, double c, double d) {
-    List<double> myList = [
-      a,
-      b,
-      c,
-      d,
-    ];
-    double currentMin = a;
-    for (int i = 0; i < myList.length; i++) {
-      if (myList[i] < currentMin) {
-        currentMin = myList[i];
-      }
+  String findMin(
+      double leftDist, double rightDist, double topDist, double bottomDist) {
+    // Initialize a variable to hold the minimum distance and the corresponding side
+    double minDistance = leftDist;
+    String minSide = 'left';
+
+    // Compare distances to find the minimum
+    if (rightDist < minDistance) {
+      minDistance = rightDist;
+      minSide = 'right';
+    }
+    if (topDist < minDistance) {
+      minDistance = topDist;
+      minSide = 'top';
+    }
+    if (bottomDist < minDistance) {
+      minDistance = bottomDist;
+      minSide = 'bottom';
     }
 
-    if ((currentMin - a).abs() < 0.01) {
-      return 'left';
-    } else if ((currentMin - b).abs() < 0.01) {
-      return 'right';
-    } else if ((currentMin - c).abs() < 0.01) {
-      return 'top';
-    } else if ((currentMin - d).abs() < 0.01) {
-      return 'bottom';
-    }
-    return '';
+    return minSide;
   }
 
   bool isPlayerDead() {
@@ -164,6 +202,11 @@ class _MainGameState extends State<MainGame> {
   }
 
   void moveBall() {
+    // Return early if the game is won
+    if (isGameWon) {
+      return;
+    }
+
     setState(() {
       // Horizontal Movement
       if (ballXDirection == direction.LEFT) {
@@ -202,6 +245,11 @@ class _MainGameState extends State<MainGame> {
   }
 
   void onHorizontalSlide(DragUpdateDetails details) {
+    // Return early if the game is won
+    if (isGameWon) {
+      return;
+    }
+
     setState(() {
       if (hasGameStarted) {
         // Update the position based on the drag delta
@@ -229,6 +277,7 @@ class _MainGameState extends State<MainGame> {
       ballY = 0;
       isGameOver = false;
       hasGameStarted = false;
+      isGameWon = false;
 
       MyBricks = [
         // {x, y, broken = true/false}
@@ -264,6 +313,10 @@ class _MainGameState extends State<MainGame> {
               // Game Over
               GameOverScreen(
                 isGameOver: isGameOver,
+                function: resetGame,
+              ),
+              GameWinScreen(
+                isGameWon: isGameWon,
                 function: resetGame,
               ),
               // ball
