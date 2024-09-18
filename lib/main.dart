@@ -1,20 +1,16 @@
+import 'package:brick_breaker_app/screens/index.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+void main() => runApp(const MyGame());
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyGame extends StatelessWidget {
+  const MyGame({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      home: BrickBreaker(),
     );
   }
 }
