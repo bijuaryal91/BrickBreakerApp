@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  widget_and_text_animator: ^1.1.5
 
 dev_dependencies:
   flutter_test:
